@@ -1,6 +1,6 @@
 import streamlit as st
-from backend import chatbot
-from langchain_core.messages import HumanMessage
+from backend_with_tools import chatbot
+from langchain_core.messages import HumanMessage, AIMessage
 from Simp_langgraph_backend import retrieve_all_threads
 import uuid
 
@@ -83,11 +83,23 @@ if input :
         st.write(input)
     
     with st.chat_message("assistant") : # here we just add assistant animated block in our frontend
-        ai_message = st.write_stream(
-            message_chunk.content for message_chunk, metadata in chatbot.stream(
-                {"messages" : [HumanMessage(content=input)]},
-                config={"configurable" : {"thread_id" : st.session_state["thread_id"]}}, 
-                stream_mode="messages")
-        )
+        def ai_only_stream():
+            for message_chunk, metadata in chatbot.stream(
+                {"messages": [HumanMessage(content=input)]},
+                config={"configurable" : {"thread_id" : st.session_state["thread_id"]}},
+                stream_mode="messages",
+            ):
+                if isinstance(message_chunk, AIMessage):
+                    # yield only assistant tokens
+                    yield message_chunk.content
+
+
+        ai_message = st.write_stream(ai_only_stream())
+        # ai_message = st.write_stream(
+        #     message_chunk.content for message_chunk, metadata in chatbot.stream(
+        #         {"messages" : [HumanMessage(content=input)]},
+        #         config={"configurable" : {"thread_id" : st.session_state["thread_id"]}}, 
+        #         stream_mode="messages")
+        # )
     
     st.session_state["message_hist"].append({"role" : "assistant", "content" : ai_message})
