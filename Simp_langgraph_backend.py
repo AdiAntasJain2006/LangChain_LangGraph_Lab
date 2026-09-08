@@ -4,6 +4,7 @@ from langchain_core.messages import BaseMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import add_messages
 from langchain_ollama import ChatOllama
+from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage, HumanMessage
 import sqlite3
 
@@ -14,9 +15,9 @@ class ChatState(TypedDict) :
     
 def chat_node(state : ChatState) -> ChatState :
     sys_msg = SystemMessage(content="You are a helpful AI assistant. Always keep answers concise and easy to read")
-    full_message = [sys_msg] + state['message']
+    full_message = [sys_msg] + state['messages']
     response = llm.invoke(full_message)
-    return {"message" : [response]}
+    return {"messages" : [response]}
 
 conn = sqlite3.connect(database="AAJ_database.db", check_same_thread=False)
 

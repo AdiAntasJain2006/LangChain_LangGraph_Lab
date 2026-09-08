@@ -4,3 +4,5 @@ __pycache__/
 *.db-shm
 *.db-wal
 .env
+requirements.txt
+file_4.pdf
