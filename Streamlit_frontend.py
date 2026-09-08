@@ -1,5 +1,5 @@
 import streamlit as st
-from Simp_langgraph_backend import chatbot
+from backend import chatbot
 from langchain_core.messages import HumanMessage
 from Simp_langgraph_backend import retrieve_all_threads
 import uuid
@@ -20,8 +20,12 @@ def reset_chat() : # if we create new chat then it is used
     add_thread(st.session_state["thread_id"])
     st.session_state["message_hist"] = []
     
-def load_conv(thread_id) : # load conversation from chatbot
-    return chatbot.get_state({"configurable" : {"thread_id" : thread_id}}).values["message"]
+def load_conv(thread_id):
+  state = chatbot.get_state({"configurable": {"thread_id": thread_id}})
+  # Safely check if values and messages exist to prevent KeyErrors
+  if state and state.values:
+    return state.values.get("messages", [])
+  return []
     
 
 
@@ -81,7 +85,7 @@ if input :
     with st.chat_message("assistant") : # here we just add assistant animated block in our frontend
         ai_message = st.write_stream(
             message_chunk.content for message_chunk, metadata in chatbot.stream(
-                {"message" : [HumanMessage(content=input)]},
+                {"messages" : [HumanMessage(content=input)]},
                 config={"configurable" : {"thread_id" : st.session_state["thread_id"]}}, 
                 stream_mode="messages")
         )

@@ -1,2 +1,6 @@
-myenv
-AAJ_database.db
+myenv/
+__pycache__/
+*.db
+*.db-shm
+*.db-wal
+.env
